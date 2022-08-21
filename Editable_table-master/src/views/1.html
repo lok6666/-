@@ -1,0 +1,289 @@
+
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>北京地图</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+
+    #container {
+      width: 500px;
+      height: 800px;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="container">
+    <div class="secondConBox">
+      <div class="wrap">
+      <!-- crumbs -->
+      <div class="crumbs">
+           当前位置：首页 &gt; 政务公开 &gt; 政策与解读
+          </div>
+      <!-- titleBox -->
+      <div class="titleBox btmLine">
+      <h1>图解：《石景山区深入打好污染防治攻坚战2022年行动计划》</h1>
+      <!-- <div class="whBox">区政府办</div> -->
+      <link href="/gongkai/images/share.css" rel="stylesheet" type="text/css"/>
+      <style>
+              #othermessage #fontSize a.on{color:#000;}
+              .qrcode{
+                box-sizing:content-box;
+                position:absolute;
+                top:36px;border:1px solid #ccc;padding:5px;width:100px;height:100px;left:-137%;z-index:11;display:none;
+              }
+              </style>
+      <div id="othermessage">
+      <p class="f1">
+      <span>日期:2022-04-06 11:06</span>    
+                              <span>来源:区政府办</span>
+      </p >
+      <div id="prolasim">
+      <font>分享:</font>
+      <div class="shareList bdsharebuttonbox bdshare-button-style0-16" data-bd-bind="1583738645547">
+      <a class="bds_weixin share-wechat" style="position:relative" title="分享到微信"><div class="bg-code"></div><div class="qrcode"></div><span class="close-btn"></span></ a>
+      <a class="bds_tsina share-weibo" title="分享到新浪微博"></ a> <!-- data-cmd="tsina"-->
+      <!--  <a  class="bds_sqq share-qq"  title="分享到QQ好友"></ a>  --><!-- data-cmd="sqq"-->
+      <a class="bds_qzone share-qqzone" title="分享到QQ空间"></ a> <!-- data-cmd="qzone"-->
+      </div>
+      <script>
+                                  window._bd_share_config = {
+                                      "common": {
+                                          "bdSnsKey": {},
+                                          "bdText": "",
+                                          "bdMini": "2",
+                                          "bdPic": "",
+                                          "bdStyle": "0",
+                                          "bdSize": "16"
+                                      },
+                                      "share": {}
+                                  };
+                                  with(document) 0[(getElementsByTagName("head")[0] || body).appendChild(createElement("script")).src = "http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion=" + ~(-new Date() / 36e5)];
+                              </script>
+      <script src="http://www.bjsjs.gov.cn/gongkai/zwgkpd/ztzl/2022/zcml/js/jquery-1.11.3.min.js" type="text/javascript"></script>
+      <script src="http://www.beijing.gov.cn/ywdt/images/jquery.qrcode.min.js"></script>
+      <script>
+      
+                                  //分享
+                                  var title = "【" + $.trim(document.title) + "】";
+                                  var description = $.trim($("meta[name="description"]").attr("content"));
+                                  var portalUrl = window.location.href;
+          function generateQRCode(rendermethod, picwidth, picheight, url) {
+              $(".qrcode").qrcode({
+                  render: rendermethod, // 渲染方式有table方式（IE兼容）和canvas方式
+                  width: picwidth, //宽度
+                  height: picheight, //高度
+                  text: utf16to8(portalUrl), //内容
+                  typeNumber: -1, //计算模式
+                  correctLevel: 2, //二维码纠错级别
+                  background: "#ffffff", //背景颜色
+                  foreground: "#000000" //二维码颜色
+      
+              });
+          }
+          canvas_table = !!document.createElement("canvas").getContext ? "canvas" : "table";
+      
+          function init() {
+              generateQRCode(canvas_table, 100, 100, window.location.href);
+          }
+          //中文编码格式转换
+          function utf16to8(str) {
+              var out, i, len, c;
+              out = "";
+              len = str.length;
+              for(i = 0; i < len; i++) {
+                  c = str.charCodeAt(i);
+                  if((c >= 0x0001) && (c <= 0x007F)) {
+                      out += str.charAt(i);
+                  } else if(c > 0x07FF) {
+                      out += String.fromCharCode(0xE0 | ((c >> 12) & 0x0F));
+                      out += String.fromCharCode(0x80 | ((c >> 6) & 0x3F));
+                      out += String.fromCharCode(0x80 | ((c >> 0) & 0x3F));
+                  } else {
+                      out += String.fromCharCode(0xC0 | ((c >> 6) & 0x1F));
+                      out += String.fromCharCode(0x80 | ((c >> 0) & 0x3F));
+                  }
+              }
+              return out;
+          }
+          init();
+          $(".share-wechat").on("click", function() {
+              $(".bg-code,.qrcode").toggle();
+          });
+               
+                                  function showToQzone() {
+                                      var _desc = description;
+                                      var _title = title;
+                                      var _url = portalUrl;
+                                      var _shareUrl = "http://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?";
+                                      _shareUrl += "url=" + encodeURIComponent(_url);   //参数url设置分享的内容链接|默认当前页location
+                                      _shareUrl += "&title=" + encodeURIComponent(_title);    //参数title设置分享标题，可选参数
+                                      window.open(_shareUrl,"","width=700,height=680,top=0,left=0,toolbar=no,menubar=no,scrollbars=no,resizable=1,location=yes,status=0");
+                                  }
+      
+                                  function showToSina(title, portalUrl, desc) {
+                                      var _desc = desc;
+                                      var _t = title + " " + _desc;
+                                      var _url = portalUrl;
+                                      var _appkey = "2806082167"; //你从微薄获得的appkey
+                                      var _site = ""; //你的网站地址
+                                      var _ralateUid = "";
+                                      var _u = "http://service.weibo.com/share/share.php?url=" + _url + "&appkey=" + _appkey + "&title=" + _t + "&ralateUid=" + _ralateUid + "&searchPic=false";
+                                      window.open(_u, "", "width=700, height=680, top=0, left=0, toolbar=no, menubar=no, scrollbars=no, location=yes, resizable=no, status=no");
+                                  }
+                                 
+                                  $(".share-qqzone").on("click", function() {
+                                      showToQzone(title, portalUrl, description);
+                                  });
+                                  $(".share-weibo").on("click", function() {
+                                      showToSina(title, portalUrl, description);
+                                  });
+                                 
+                              </script>
+      </div>
+      <dl class="fr" id="fontSize">
+      
+                              字号：  
+                              <a class="" href=" ">大</ a>  
+                              <a class="on" href="javascript:changeSize(16)">中</ a>  
+                              <a class="" href="javascript:changeSize(14)">小</ a>
+      <script language="JavaScript" type="text/javascript">
+                                  function changeSize(size) {
+                                      document.getElementById("mainText").style.fontSize=size+"px"
+                                  }
+                              </script>
+      </dl>
+      </div>
+      <script>
+              var oDl = document.getElementById("fontSize");
+              var aA = oDl.getElementsByTagName("a");
+      
+              for(var i = 0;i<aA.length;i++){
+                  aA[i].index  = i;
+                  aA[i].onclick = function(){
+                      for(var i = 0;i<aA.length;i++){
+                          aA[i].className = "";
+                      }
+                      this.className = "on";
+                  };
+              }
+                      </script>
+      </div>
+      <!-- content -->
+      <div class="contentBox" id="mainText">
+      <div style="text-align: center;"><span style="font-size: 12pt;">< img alt="" oldsrc="W020220406401798273345.jpg" src="http://www.bjsjs.gov.cn/gongkai/zwgkpd/zcyjd_1944/202204/W020220406401798273345.jpg" style="border-width: 0px;"/></span></div>
+      <div style="text-align: left;">　　<span style="font-size: 12pt;">
+      <p> </p >
+      <p>　　</p >
+      </span></div>
+      <div style="text-align: left;">　　<span style="font-size: 12pt;">文字解读：</span>< a href="http://www.bjsjs.gov.cn/gongkai/zwgkpd/zcyjd_1944/202204/t20220406_57509.shtml" target="_blank">《石景山区深入打好污染防治攻坚战2022年行动计划》</ a></div>
+      <div style="text-align: left;">　　<span style="font-size: 12pt;">相关政策：</span>< a href="http://www.bjsjs.gov.cn/gongkai/zwgkpd/zcwj_1940/qzfbgswj_1942/202204/t20220406_57506.shtml" target="_blank">石政办发〔2022〕 2 号 北京市石景山区人民政府办公室关于印发《石景山区深入打好污染防治攻坚战2022 年行动计划》 的通知</ a></div>
+      <div style="text-align: left;">
+      <p> </p >
+      </div>
+      <script>
+                          var sp="";
+                          var sp2="";
+                          document.write("<div class="xza">");
+                          if (sp != "")
+                          {
+                              document.write("<p>"+sp+"</p >");
+                          }
+                          if (sp2 != "")
+                          {
+                              document.write("<p>"+sp2+"</p >");
+                          }
+                          document.write("</div>");
+                      </script>
+      <p style="text-align:center;font-size:14px;margin-top:20px;">扫一扫在手机打开当前页</p >
+      <div class="qrcode1" id="qrcode" style="width:150px;height:150px;margin:10px auto 50px;"></div>
+      <script src="/gongkai/images/jquery-3.6.0.min.js"></script>
+      <script src="/gongkai/images/qrcode.min.js"></script>
+      <script>
+      
+              var qrcode = new QRCode("qrcode", {
+                  width: 150,
+                  height: 150,
+                  correctLevel: QRCode.CorrectLevel.H
+              });
+              qrcode.makeCode(window.location.href);
+      
+          </script>
+      </div>
+      </div>
+      </div>
+  </div>
+</body>
+
+</html>
