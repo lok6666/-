@@ -13,7 +13,7 @@
 import { useRouter } from "vue-router";
 import axios from "axios";
 import { ref, nextTick, onMounted } from "vue";
-import { policyUpdate, policyDetail, policyRelationList } from "../config/api";
+import { policyDetail } from "../config/api";
 const router = useRouter();
 const id = router.currentRoute.value.params.id || window.localStorage.noticeId;
 window.localStorage.noticeId = id;

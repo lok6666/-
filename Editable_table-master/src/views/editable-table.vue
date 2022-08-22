@@ -187,7 +187,12 @@
             value-format="YYYY-MM-DD HH:mm:ss"
           />
         </el-form-item>
-        <el-form-item label="内容" required prop="policyContent" v-if="title !== '编辑'">
+        <el-form-item
+          label="内容"
+          required
+          prop="policyContent"
+          v-if="title !== '编辑'"
+        >
           <div style="border: 1px solid #ccc; margin-top: 10px">
             <Toolbar
               style="border-bottom: 1px solid #ccc"
@@ -240,22 +245,24 @@
         <el-form-item label="时间">
           {{ policyRuleForm.time }}
         </el-form-item>
-        <el-form-item
-          label="政策文件"
-          prop="policyLevel"
-        >
+        <el-form-item label="政策文件" prop="policyLevel">
           <el-select
             style="width: 100%"
             v-model="policyRuleForm.file"
+            @visible-change="visibleChange"
             filterable
             multiple
+            :loading="loading"
+            @change="changeTag"
+            @remove-tag="removeTag"
+            :filter-method="fileQuery"
             placeholder="政策文件"
           >
             <el-option
               v-for="item in policyRuleForm.fileOptions"
               :key="item.id"
-              :label="item.policyTitle"
-              :value="item.id"
+              :label="item.noticeTitle || item.policyTitle"
+              :value="item.noticeId || item.id"
             />
           </el-select>
         </el-form-item>
@@ -269,13 +276,18 @@
             v-model="policyRuleForm.explain"
             filterable
             multiple
+            @visible-change="visibleChange"
+            :loading="loading"
+            @change="changeTag"
+            @remove-tag="removeTag"
+            :filter-method="explainQuery"
             placeholder="政策解读"
           >
             <el-option
               v-for="item in policyRuleForm.explainOptions"
               :key="item.id"
-              :label="item.policyTitle"
-              :value="item.id"
+              :label="item.noticeTitle || item.policyTitle"
+              :value="item.noticeId || item.id"
             />
           </el-select>
         </el-form-item>
@@ -289,13 +301,19 @@
             v-model="policyRuleForm.notice"
             filterable
             multiple
+            @visible-change="visibleChange"
+            :loading="loading"
+            @change="changeTag"
+            @remove-tag="removeTag"
+            :filter-method="noticQquery"
             placeholder="通知公告"
           >
+           <!--当初始化的时候,为了获取已经获取的insert的tag的id,故先判断noticeTitle,noticeId是否存在-->
             <el-option
               v-for="item in policyRuleForm.noticeOptions"
               :key="item.id"
-              :label="item.policyTitle"
-              :value="item.id"
+              :label="item.noticeTitle || item.policyTitle"
+              :value="item.noticeId || item.id"
             />
           </el-select>
         </el-form-item>
@@ -307,6 +325,62 @@
           >
         </span>
       </template>
+    </el-dialog>
+    <el-dialog
+      class="form-dialog"
+      style="color: red"
+      v-model="routeDialogVisible"
+      width="100%"
+      :append-to-body="true"
+      fullscreen="true"
+      :title="title"
+      top="1vh"
+      @closed="routerCloseDialog()"
+    >
+      <div class="dialog-btn" style="float: right; margin: 0 47px 10px 0">
+        <el-button
+          size="small"
+          type="primary"
+          v-if="policyKind !== '政策解读'"
+          @click="relatePolicy(detailRow)"
+          >政策关联</el-button
+        >
+        <el-button
+          size="small"
+          type="warning"
+          style="margin-top: 10px"
+          @click="edit(detailRow)"
+          >编辑</el-button
+        >
+        <el-button
+          size="small"
+          type="info"
+          style="margin-top: 10px"
+          @click="chnageEffect(detailRow.id, detailRow.policyType)"
+          >{{ detailRow.policyType ? "失效" : "有效" }}</el-button
+        >
+        <el-button
+          v-if="!detailRow.policyStatus"
+          size="small"
+          type="success"
+          style="margin-top: 10px"
+          @click="deleteTable(detailRow.id)"
+          >删除</el-button
+        >
+        <el-button
+          v-else
+          size="small"
+          type="danger"
+          @click="resume(detailRow.id)"
+          >恢复</el-button
+        >
+      </div>
+
+      <iframe
+        :src="iframeSrc"
+        frameborder="0"
+        style="width: 100%; height: 1000px"
+      ></iframe>
     </el-dialog>
     <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
       <el-tab-pane label="未标注列表" name="exist"></el-tab-pane>
@@ -342,9 +416,7 @@
       </el-table-column>
       <el-table-column property="policyLevel" label="关联" sortable width="100">
         <template #default="scope">{{
-          scope.row.isRelation === 0
-            ? "无关联"
-            : "关联"
+          scope.row.isRelation === 0 ? "无关联" : "关联"
         }}</template>
       </el-table-column>
       <!-- <el-table-column property="policyLevel" label="级别" sortable width="100">
@@ -367,27 +439,28 @@
             size="small"
             type="primary"
             v-if="policyKind !== '政策解读'"
-            @click="relatePolicy(scope.$index, scope.row.id, scope.row)"
+            @click="relatePolicy(scope.row)"
             >政策关联</el-button
           >
           <el-button
             size="small"
             type="primary"
             @click="routerTo(scope.$index, scope.row.id, scope.row)"
-            >跳转</el-button
+            >详情</el-button
           >
-           <el-button
+          <el-button
             size="small"
             type="warning"
             style="margin-top: 10px"
             @click="edit(scope.$index, scope.row)"
-            >编辑</el-button>
-           <el-button
+            >编辑</el-button
+          >
+          <el-button
             size="small"
             type="info"
             style="margin-top: 10px"
             @click="chnageEffect(scope.row.id, scope.row.policyType)"
-            >{{scope.row.policyType? '失效':'有效'}}</el-button
+            >{{ scope.row.policyType ? "失效" : "有效" }}</el-button
           >
           <el-button
             v-if="!scope.row.policyStatus"
@@ -449,7 +522,7 @@ import {
   policyOptions,
   typeOptions,
   locationOptions,
-  relationOptions
+  relationOptions,
 } from "../config/constant";
 import { Editor, Toolbar } from "@wangeditor/editor-for-vue";
 import { Boot } from "@wangeditor/editor";
@@ -470,6 +543,7 @@ const currentPage4 = ref(1);
 const pageSize4 = ref(10);
 const ruleFormRef = ref();
 const policyRuleFormRef = ref();
+const iframeSrc = ref("");
 const policyRuleForm = ref({
   title: "",
   source: "",
@@ -479,6 +553,7 @@ const policyRuleForm = ref({
   file: [],
 });
 const title = ref("新增");
+const loading = ref(true);
 let ruleForm = reactive({
   policyTitle: "",
   policyLocation: "",
@@ -503,12 +578,14 @@ const router = useRouter();
 const total = ref(0);
 const pageNum = ref(1);
 const pageSize = ref(10);
-const tableData = ref([]);;
+const tableData = ref([]);
 const background = ref(false);
 const levelValue = ref("");
 const typeValue = ref("有效");
 const policyKind = ref("通知公告");
 const dialogVisible = ref(false);
+const routeDialogVisible = ref(false);
+const detailRow = ref();
 const announcementVisible = ref(false);
 const locationValue = ref("shijingshan");
 const isRelationValue = ref(0);
@@ -536,7 +613,7 @@ const toolbarConfig = {
   // 插入哪些菜单
   insertKeys: {
     index: 0, // 自定义插入的位置
-    keys: ["uploadAttachment"] // “上传附件”菜单
+    keys: ["uploadAttachment"], // “上传附件”菜单
   },
 };
 const editorConfig = {
@@ -655,83 +732,100 @@ onBeforeUnmount(() => {
 
   editor.destroy();
 });
+// 移除tag
+const removeTag = (e) => {
+  console.log("removeTag", e);
+};
+// 添加tag
+const changeTag = (e) => {
+console.log("changeTag", e);
+};
+const visibleChange = (e) => {
+  console.log('visibleChange', e);
+  policyRuleForm.value.options = [];
+  loading.value = true;
+};
+// 自定义搜索
+const fileQuery = (e) => {
+  query(e, "政策文件", `fileOptions`);
+};
+const explainQuery = (e) => {
+  query(e, "政策解读", `explainOptions`);
+};
+const noticQquery = (e) => {
+  query(e, "通知公告", `noticeOptions`);
+};
+const query = (e, policyKind, options) => {
+  axios
+    .post(`${policyTagList}`, {
+      policyKind: policyKind,
+      policyTitle: e
+    })
+    .then(({ data }) => {
+      policyRuleForm.value[options] = data.data;
+      loading.value = false;
+    });
+};
 
 // 政策关联
-const relatePolicy = (index, id, row) => {
+const relatePolicy = (row) => {
   policyRuleForm.value = {
     title: row.policyTitle,
     source: row.policySource,
     time: row.policyTime,
     policyId: row.id,
     explain: [],
-    explainOptions: [],
-    noticeOptions: [],
-    fileOptions: [],
+    selectOptions: []
   };
   // 政策文件或政策解读 政策关联弹窗展示 政策解读 和 通知公告
   policyKind.value !== "通知公告" &&
     axios
       .all([
-        axios.post(`${policyTagList}`, {
-          policyKind: "政策解读"
+        axios.post(`${policyRelationList}`, {
+          policyId: row.id,
+          relationType: "政策解读",
         }),
-        axios.post(`${policyTagList}`, {
-          policyKind: "通知公告"
+        axios.post(`${policyRelationList}`, {
+          policyId: row.id,
+          relationType: "通知公告",
         }),
-        axios.post(`${policyTagList}`, {
-          policyKind: "政策文件"
+        axios.post(`${policyRelationList}`, {
+          policyId: row.id,
+          relationType: "政策文件",
         }),
       ])
       .then(([explain, notice, file]) => {
-        policyRuleForm.value.explainOptions = explain.data.data;
-        policyRuleForm.value.noticeOptions = notice.data.data;
-        policyRuleForm.value.fileOptions = file.data.data;
-        // 获取关联信息
-        axios
-          .post(`${policyRelationList}`, {
-            policyId: row.id,
-            relationType: "政策解读",
-          })
-          .then(async function ({ data }) {
-            policyRuleForm.value.explain = data.data.list.map((e) => e.noticeId);
-          });
-        axios
-          .post(`${policyRelationList}`, {
-            policyId: row.id,
-            relationType: "通知公告",
-          })
-          .then(async function ({ data }) {
-            policyRuleForm.value.notice = data.data.list.map((e) => e.noticeId);
-          });
-          axios
-          .post(`${policyRelationList}`, {
-            policyId: row.id,
-            relationType: "政策文件",
-          })
-          .then(async function ({ data }) {
-            policyRuleForm.value.file = data.data.list.map((e) => e.noticeId);
-            //  policyRuleForm.value.fileOptions.some(e => {
-            //    if(e.) {};
-            //  });
-          });
-          announcementVisible.value = true;
+        console.log('explain-----', explain);
+        policyRuleForm.value.explain = explain.data.data.list.map((e) => e.noticeId);
+        policyRuleForm.value.explainOptions = explain.data.data.list;
+
+        policyRuleForm.value.notice = notice.data.data.list.map((e) => e.noticeId);
+         policyRuleForm.value.noticeOptions = notice.data.data.list;
+
+        policyRuleForm.value.file = file.data.data.list.map((e) => e.noticeId);
+        policyRuleForm.value.fileOptions = file.data.data.list;
+        announcementVisible.value = true;
       });
+
   // 通知公告 政策关联弹窗展示 政策文件
   policyKind.value === "通知公告" &&
     axios
       .post(`${policyTagList}`, {
-        policyKind: "政策文件"
+        policyKind: "政策文件",
       })
       .then(({ data }) => {
-        policyRuleForm.value.fileOptions = data.data;
+        // policyRuleForm.value.selectOptions = data.data;
         // 获取关联信息
         axios
           .post(`${policyRelationList}`, {
             noticeId: row.id,
-            relationType: "通知公告"
+            relationType: "通知公告",
           })
           .then(async function ({ data }) {
-            policyRuleForm.value.file = data.data.list.map((e) => e.policyId);
+            policyRuleForm.value.file = data.data.list.map(
+              (e) => e.noticeTitle
+            );
+            policyRuleForm.value.virtualizedFile = data.data.list;
             announcementVisible.value = true;
           });
       });
@@ -740,34 +834,31 @@ const relatePolicy = (index, id, row) => {
 // 确定关联
 const relationShap = async () => {
   if (policyKind.value === "通知公告") {
-    await axios
-      .post(`${policyFileInsert}`, {
-        //注意入参不要更改
-        noticeId: policyRuleForm.value.policyId,
-        policyIds: policyRuleForm.value.file,
-        relationType: "通知公告"
-      })
-      announcementVisible.value = false;
+    await axios.post(`${policyFileInsert}`, {
+      //注意入参不要更改
+      noticeId: policyRuleForm.value.policyId,
+      policyIds: policyRuleForm.value.file,
+      relationType: "通知公告",
+    });
+    announcementVisible.value = false;
   } else {
-    await axios
-      .post(`${policyTagInsert}`, {
-        policyId: policyRuleForm.value.policyId,
-        noticeIds: policyRuleForm.value.explain,
-        relationType: "政策解读"
-      })
-    await axios
-      .post(`${policyTagInsert}`, {
-        policyId: policyRuleForm.value.policyId,
-        noticeIds: policyRuleForm.value.notice,
-        relationType: "通知公告"
-      })
-      await axios
-      .post(`${policyTagInsert}`, {
-        policyId: policyRuleForm.value.policyId,
-        noticeIds: policyRuleForm.value.file,
-        relationType: "政策文件"
-      })
-      announcementVisible.value = false;
+    debugger;
+    await axios.post(`${policyTagInsert}`, {
+      policyId: policyRuleForm.value.policyId,
+      noticeIds: policyRuleForm.value.explain,
+      relationType: "政策解读",
+    });
+    await axios.post(`${policyTagInsert}`, {
+      policyId: policyRuleForm.value.policyId,
+      noticeIds: policyRuleForm.value.notice,
+      relationType: "通知公告",
+    });
+    await axios.post(`${policyTagInsert}`, {
+      policyId: policyRuleForm.value.policyId,
+      noticeIds: policyRuleForm.value.file,
+      relationType: "政策文件",
+    });
+    announcementVisible.value = false;
   }
 };
 // 编辑器回调函数
@@ -798,9 +889,13 @@ const disable = () => {
 };
 const closeDialog = () => {
   dialogVisible.value = false;
-   for (const i in ruleForm) {
-       ruleForm[i] = '';
-   };
+  for (const i in ruleForm) {
+    ruleForm[i] = "";
+  }
+};
+const routerCloseDialog = () => {
+  iframeSrc.value = "";
+  routeDialogVisible.value = false;
 };
 // 添加
 const add = () => {
@@ -808,19 +903,18 @@ const add = () => {
   dialogVisible.value = true;
 };
 // 编辑
-const edit = (index, row) => {
+const edit = (row) => {
   title.value = "编辑";
   for (const i in row) {
-    if(i === 'policyType') {
-      ruleForm[i] = row[i] === 1 ? '区级': row[i] === 2 ? '市级' : '国家级';
-    }
-    else if(i === 'policyLevel') {
-      ruleForm[i] =levelMap[row[i]];
-      ruleForm[i] = row[i] === 0 ? '失效': '有效';
+    if (i === "policyType") {
+      ruleForm[i] = row[i] === 1 ? "区级" : row[i] === 2 ? "市级" : "国家级";
+    } else if (i === "policyLevel") {
+      ruleForm[i] = levelMap[row[i]];
+      ruleForm[i] = row[i] === 0 ? "失效" : "有效";
     } else {
       ruleForm[i] = row[i];
-    }    
-  };
+    }
+  }
   dialogVisible.value = true;
 };
 // 失效
@@ -828,7 +922,7 @@ const chnageEffect = (id, policyType) => {
   axios
     .post(`${policyUpdate}`, {
       id,
-      policyType: !policyType
+      policyType: !policyType,
     })
     .then((e) => {
       getData();
@@ -851,8 +945,8 @@ const reset = () => {
   formInline.username = "";
   inputName.value = "";
   tagName.value = "";
-  policyStatus.value = "";
-  isTag.value = "";
+  policyStatus.value = 0;
+  isTag.value = 0;
   getData(policyStatus.value);
 };
 
@@ -867,15 +961,15 @@ const handleClose = async (ruleFormRef) => {
         policyKind: policyKind.value,
       };
       axios
-        .post(title.value === "新增"? `${policyInsert}`: `${policyUpdate}`, {
-          ...obj
+        .post(title.value === "新增" ? `${policyInsert}` : `${policyUpdate}`, {
+          ...obj,
         })
         .then(function (data) {
           getData();
           dialogVisible.value = false;
           for (const i in ruleForm) {
-              ruleForm[i] = '';
-          };
+            ruleForm[i] = "";
+          }
         })
         .catch((e) => {
           console.log("e", e);
@@ -912,7 +1006,7 @@ const getData = (status) => {
       policyStatus: status || policyStatus.value,
       policyTitle: inputName.value,
       policyTags: tagName.value,
-      isTag: isTag.value
+      isTag: isTag.value,
     })
     .then(function ({ data: list }) {
       tableData.value = list.data.list;
@@ -934,28 +1028,34 @@ const handleCurrentChange = (val) => {
   getData();
 };
 const routerTo = (index, id, row) => {
-  router.push({
-    name: "EditableV2",
-    params: {id, policyKind: row.policyKind}
-  });
+  detailRow.value = row;
+  title.value = "详情";
+  window.localStorage.id = id;
+  window.localStorage.policyKind = row.policyKind;
+  iframeSrc.value = `${window.location.href}policy-detail?id=${id}`;
+  routeDialogVisible.value = true;
+  // router.push({
+  //   name: "EditableV2",
+  //   params: { id, policyKind: row.policyKind }
+  // });
 };
 // 删除
-const deleteTable = (index, id) => {
+const deleteTable = (id) => {
   axios
     .post(`${policyUpdate}`, {
       id,
-      policyStatus: 1
+      policyStatus: 1,
     })
     .then((e) => {
       getData(0);
     });
 };
 // 恢复
-const resume = (index, id) => {
+const resume = (id) => {
   axios
     .post(`${policyUpdate}`, {
       id,
-      policyStatus: 0
+      policyStatus: 0,
     })
     .then((e) => {
       getData(1);

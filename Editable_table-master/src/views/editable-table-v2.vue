@@ -52,9 +52,9 @@
           @click="showInput"
           >新增标签
         </el-button>
-        <el-button size="small" type="success" @click="deleteTable()"
+        <!-- <el-button size="small" type="success" @click="deleteTable()"
           >删除</el-button
-        >
+        > -->
       </div>
     </div>
   </div>
@@ -110,22 +110,23 @@ policyKind !== "通知公告" && axios
 
 // 跳转关联详情
 const routeTo = (id) => {
-  router.push({
-    name: "notice",
-    params: { id },
-  });
+  window.open(`${window.location.href}/notice?id=${id}`);
+  // router.push({
+  //   name: "notice",
+  //   params: { id },
+  // });
 };
-// 删除
-const deleteTable = (index, id) => {
-  axios
-    .post(`${policyUpdate}`, {
-      id,
-      policyStatus: 1
-    })
-    .then((e) => {
-      router.back(-1);
-    });
-};
+// // 删除
+// const deleteTable = (index, id) => {
+//   axios
+//     .post(`${policyUpdate}`, {
+//       id,
+//       policyStatus: 1
+//     })
+//     .then((e) => {
+//       router.back(-1);
+//     });
+// };
 // 政策详情
 axios
 .get(`${policyDetail}/${id}`, {
