@@ -15,26 +15,26 @@ import axios from "axios";
 import { ref, nextTick, onMounted } from "vue";
 import { policyDetail } from "../config/api";
 const router = useRouter();
-const id = router.currentRoute.value.params.id || window.localStorage.noticeId;
+let data = ref({});
+const id = window.localStorage.noticeId;
 window.localStorage.noticeId = id;
 // 政策详情
 axios
-.get(`${policyDetail}/${id}`, {
-  headers: {
-    "Access-Control-Allow-Origin": "*",
-    "Content-Type": "application/json",
-  },
-})
-.then(function (res) {
-  data.value = res.data.data;
-  dynamicTags.value = data.value.policyTags
-    ? data.value.policyTags.split(",")
-    : [];
-})
-.catch(function (error) {
-  console.log(error);
-});
-let data = ref({});
+  .get(`${policyDetail}/${id}`, {
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Content-Type": "application/json",
+    },
+  })
+  .then(function (res) {
+    data.value = res.data.data;
+    dynamicTags.value = data.value.policyTags
+      ? data.value.policyTags.split(",")
+      : [];
+  })
+  .catch(function (error) {
+    console.log(error);
+  });
 </script>
 <style lang="scss" scoped>
 #detail {
@@ -104,5 +104,4 @@ let data = ref({});
   max-width: 220px;
   word-wrap: break-word;
 }
-
 </style>

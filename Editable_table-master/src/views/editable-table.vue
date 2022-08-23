@@ -76,9 +76,38 @@
           />
         </el-select>
       </div>
+      <div style="display: inline-block">
+        <el-select
+          v-model="personValue"
+          filterable
+          placeholder="人员筛选"
+          @change="getData()"
+        >
+          <el-option
+            v-for="item in personOptions"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          />
+        </el-select>
+      </div>
       <div style="display: inline-flex">
-        <el-input v-model="formInline.username" placeholder="请输入标题" />
-        <el-input v-model="formInline.tagKey" placeholder="请输入标签关键字" />
+        <el-input v-model="formInline.username" style="width: 200px;" placeholder="请输入标题" />
+        <el-input v-model="formInline.tagKey" style="width: 200px;" placeholder="请输入标签关键字" />
+        <div style="display: inline-block">
+         <el-date-picker
+          v-model="startTime"
+          type="datetime"
+          placeholder="开始时间"
+          format="YYYY/MM/DD HH:mm:ss"
+          value-format="YYYY-MM-DD HH:mm:ss"
+        /><el-date-picker
+          v-model="endTime"
+          type="datetime"
+          placeholder="结束时间"
+          format="YYYY/MM/DD HH:mm:ss"
+          value-format="YYYY-MM-DD hh:mm:ss"
+        /></div>
         <el-button type="primary" @click="onSubmit">搜索</el-button>
         <el-button type="danger" class="button-new-tag ml-1" @click="reset"
           >重置
@@ -308,7 +337,7 @@
             :filter-method="noticQquery"
             placeholder="通知公告"
           >
-           <!--当初始化的时候,为了获取已经获取的insert的tag的id,故先判断noticeTitle,noticeId是否存在-->
+            <!--当初始化的时候,为了获取已经获取的insert的tag的id,故先判断noticeTitle,noticeId是否存在-->
             <el-option
               v-for="item in policyRuleForm.noticeOptions"
               :key="item.id"
@@ -404,6 +433,9 @@
       <el-table-column label="发布时间" width="200">
         <template #default="scope">{{ scope.row.policyTime }}</template>
       </el-table-column>
+      <el-table-column prop="lastUpdateTime" label="删除时间" v-if="policyStatus" sortable width="200">   
+        <template #default="scope">{{ scope.row.lastUpdateTime }}</template>
+      </el-table-column>
       <el-table-column
         property="policyLocation"
         label="区域"
@@ -467,14 +499,14 @@
             size="small"
             type="success"
             style="margin-top: 10px"
-            @click="deleteTable(scope.$index, scope.row.id)"
+            @click="deleteTable(scope.row.id)"
             >删除</el-button
           >
           <el-button
             v-else
             size="small"
             type="danger"
-            @click="resume(scope.$index, scope.row.id)"
+            @click="resume(scope.row.id)"
             >恢复</el-button
           >
         </template>
@@ -523,6 +555,7 @@ import {
   typeOptions,
   locationOptions,
   relationOptions,
+  personOptions
 } from "../config/constant";
 import { Editor, Toolbar } from "@wangeditor/editor-for-vue";
 import { Boot } from "@wangeditor/editor";
@@ -574,6 +607,8 @@ const policyStatus = ref(0);
 // 模糊匹配
 const policyTags = ref("");
 const isTag = ref(0);
+const startTime = ref(0);
+const endTime = ref(0);
 const router = useRouter();
 const total = ref(0);
 const pageNum = ref(1);
@@ -589,6 +624,7 @@ const detailRow = ref();
 const announcementVisible = ref(false);
 const locationValue = ref("shijingshan");
 const isRelationValue = ref(0);
+const personValue = ref('');
 const inputName = ref("");
 const tagName = ref("");
 const formInline = reactive({
@@ -738,10 +774,9 @@ const removeTag = (e) => {
 };
 // 添加tag
 const changeTag = (e) => {
-console.log("changeTag", e);
+  console.log("changeTag", e);
 };
 const visibleChange = (e) => {
-  console.log('visibleChange', e);
   policyRuleForm.value.options = [];
   loading.value = true;
 };
@@ -795,12 +830,15 @@ const relatePolicy = (row) => {
         }),
       ])
       .then(([explain, notice, file]) => {
-        console.log('explain-----', explain);
-        policyRuleForm.value.explain = explain.data.data.list.map((e) => e.noticeId);
+        policyRuleForm.value.explain = explain.data.data.list.map(
+          (e) => e.noticeId
+        );
         policyRuleForm.value.explainOptions = explain.data.data.list;
 
-        policyRuleForm.value.notice = notice.data.data.list.map((e) => e.noticeId);
-         policyRuleForm.value.noticeOptions = notice.data.data.list;
+        policyRuleForm.value.notice = notice.data.data.list.map(
+          (e) => e.noticeId
+        );
+        policyRuleForm.value.noticeOptions = notice.data.data.list;
 
         policyRuleForm.value.file = file.data.data.list.map((e) => e.noticeId);
         policyRuleForm.value.fileOptions = file.data.data.list;
@@ -942,11 +980,14 @@ const reset = () => {
   locationValue.value = "";
   typeValue.value = "";
   isRelationValue.value = "";
+  personValue.value = "";
   formInline.username = "";
   inputName.value = "";
   tagName.value = "";
   policyStatus.value = 0;
   isTag.value = 0;
+  startTime.value = "";
+  endTime.value = "";
   getData(policyStatus.value);
 };
 
@@ -1004,11 +1045,15 @@ const getData = (status) => {
       policyType: typeMap[typeValue.value],
       isRelation: isRelationValue.value,
       policyStatus: status || policyStatus.value,
+      personName: personValue.value,
       policyTitle: inputName.value,
       policyTags: tagName.value,
       isTag: isTag.value,
+      startTime: startTime.value,
+      endTime: endTime.value,
     })
     .then(function ({ data: list }) {
+      debugger;
       tableData.value = list.data.list;
       total.value = list.data.total;
     })

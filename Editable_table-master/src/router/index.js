@@ -19,6 +19,11 @@ const routes = [
     path: '/notice-detail',
     name: 'notice',
     component: () => import('@/views/excelT.vue')
+  },
+  {
+    path: '/form',
+    name: 'form',
+    component: () => import('@/views/form.vue')
   }
 ]
 

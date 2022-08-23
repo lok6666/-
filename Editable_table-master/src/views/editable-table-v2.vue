@@ -1,7 +1,7 @@
 <template>
   <!-- 可编辑表格V2 -->
   <div id="detail">
-    <div class="Md-zcxx" style="width: 80%">
+    <div class="Md-zcxx" style="width: 78%">
       <div class="MD-fcje1">
         <div v-html="data.policyContent" style="font-size: 18px"></div>
         <div style="height: 300px">
@@ -14,7 +14,9 @@
               v-for="i in count"
               :key="i"
               class="polic-relation-item"
-              @click="routeTo(policyKind === '通知公告'? i.policyId: i.noticeId)"
+              @click="
+                routeTo(policyKind === '通知公告' ? i.policyId : i.noticeId)
+              "
             >
               {{ i.noticeTitle }}
             </li>
@@ -52,9 +54,27 @@
           @click="showInput"
           >新增标签
         </el-button>
-        <!-- <el-button size="small" type="success" @click="deleteTable()"
-          >删除</el-button
-        > -->
+        <el-input
+          style="width: 400px; display: block; margin-top: 10px"
+          v-model="descInputValue"
+          class="ml-1 w-20"
+          size="small"
+          placeholder="请输入行业名称"
+          @input="handleDesc"
+        />
+        <div class="demo-collapse" v-if="descList.length !== 0">
+          <el-table
+            :key="i"
+            :data="descList"
+            max-height="500"
+            stripe
+            style="width: 100%"
+          >
+            <el-table-column prop="indType" label="类别" width="80" />
+            <el-table-column prop="indName" label="名称" width="150" />
+            <el-table-column prop="indFile" label="文件" width="150" />
+          </el-table>
+        </div>
       </div>
     </div>
   </div>
@@ -63,12 +83,18 @@
 <script setup>
 import { useRouter } from "vue-router";
 import axios from "axios";
-import { ref, nextTick, onMounted } from "vue";
-import { policyUpdate, policyDetail, policyRelationList, policyFilelistByNoticeId } from "../config/api";
+import { ref, onMounted, nextTick } from "vue";
 import {
-  tagMap
-} from "../config/constant";
+  policyUpdate,
+  policyDetail,
+  industryCodeList,
+  policyRelationList,
+  policyFilelistByNoticeId,
+} from "../config/api";
+import { tagMap } from "../config/constant";
 const inputValue = ref("");
+const descList = ref([]);
+const descInputValue = ref("");
 const dynamicTags = ref(Object.keys(tagMap));
 const inputVisible = ref(false);
 const isExist = ref(false);
@@ -76,83 +102,77 @@ const index = ref(0);
 const InputRef = ref("");
 const router = useRouter();
 const count = ref([]);
-const {id = window.localStorage.id, policyKind = window.localStorage.policyKind} = router.currentRoute.value.params;
+const {
+  id = window.localStorage.id,
+  policyKind = window.localStorage.policyKind,
+} = router.currentRoute.value.params;
 window.localStorage.id = id;
 window.localStorage.policyKind = policyKind;
 let data = ref({});
 // 获取关联信息
-policyKind === '通知公告' && axios
-          .post(`${policyFilelistByNoticeId}`, {
-            noticeId: id,
-            relationType: "通知公告"
-          })
-          .then(async function ({ data }) {
-            count.value = data.data.list;
-          });
+policyKind === "通知公告" &&
+  axios
+    .post(`${policyFilelistByNoticeId}`, {
+      noticeId: id,
+      relationType: "通知公告",
+    })
+    .then(async function ({ data }) {
+      count.value = data.data.list;
+    });
 
-policyKind !== "通知公告" && axios
-          .post(`${policyRelationList}`, {
-            policyId: id,
-            relationType: "政策解读"
-          })
-          .then(async function ({ data }) {
-            count.value = count.value.concat(data.data.list);
-          })
-         && axios
-          .post(`${policyRelationList}`, {
-            policyId: id,
-            relationType: "通知公告"
-          })
-          .then(async function ({ data }) {
-            count.value = count.value.concat(data.data.list);
-            console.log('count.value-----1', count.value);
-          });
+policyKind !== "通知公告" &&
+  axios
+    .post(`${policyRelationList}`, {
+      policyId: id,
+      relationType: "政策解读",
+    })
+    .then(async function ({ data }) {
+      count.value = count.value.concat(data.data.list);
+    }) &&
+  axios
+    .post(`${policyRelationList}`, {
+      policyId: id,
+      relationType: "通知公告",
+    })
+    .then(async function ({ data }) {
+      count.value = count.value.concat(data.data.list);
+    });
 
 // 跳转关联详情
 const routeTo = (id) => {
-  window.open(`${window.location.href}/notice?id=${id}`);
+  window.localStorage.noticeId = id;
+  window.open(`#/notice-detail?noticeid=${id}`);
   // router.push({
   //   name: "notice",
   //   params: { id },
   // });
 };
-// // 删除
-// const deleteTable = (index, id) => {
-//   axios
-//     .post(`${policyUpdate}`, {
-//       id,
-//       policyStatus: 1
-//     })
-//     .then((e) => {
-//       router.back(-1);
-//     });
-// };
-// 政策详情
 axios
-.get(`${policyDetail}/${id}`, {
-})
-.then(function (res) {
-  data.value = res.data.data;
-  dynamicTags.value = data.value.policyTags
-    ? data.value.policyTags.split(",")
-    : dynamicTags.value;
-})
-.catch(function (error) {
-  console.log(error);
-});
+  .get(`${policyDetail}/${id}`, {})
+  .then(function (res) {
+    data.value = res.data.data;
+    dynamicTags.value = data.value.policyTags
+      ? data.value.policyTags.split(",")
+      : dynamicTags.value;
+  })
+  .catch(function (error) {
+    console.log(error);
+  });
 
 const handleClose = (tag) => {
   let isTag = dynamicTags.value.length === 1 ? 0 : 1;
   dynamicTags.value.splice(dynamicTags.value.indexOf(tag), 1);
   axios.post(`${policyUpdate}`, {
     id,
-    policyTags: dynamicTags.value.map(e => tagMap[e] ? tagMap[e] : e).join(),
-    isTag
+    policyTags: dynamicTags.value
+      .map((e) => (tagMap[e] ? tagMap[e] : e))
+      .join(),
+    isTag,
   });
 };
 
 const handleClick = (tag) => {
-  inputVisible.value = true
+  inputVisible.value = true;
   inputValue.value = tag;
   isExist.value = true;
   index.value = dynamicTags.value.indexOf(tag);
@@ -160,25 +180,52 @@ const handleClick = (tag) => {
 
 const showInput = () => {
   inputVisible.value = true;
-  isExist.value = '';
+  isExist.value = "";
+};
+const handleDesc = () => {
+  console.log("handleDesc");
+  descList.value = [];
+  // descInputValue.value = 请求列表
+  axios
+    .post(`${industryCodeList}`, {
+      indName: descInputValue.value,
+    })
+    .then(async function ({ data }) {
+      descList.value = data.data.list;
+      // debugger;
+      nextTick(() => {
+        //代码
+        // debugger;
+        const cell = document.querySelectorAll(
+          ".el-table__body tbody tr td:nth-child(2)"
+        );
+        cell.forEach((dom) => {
+          dom.innerHTML = dom.innerHTML.replace(
+            descInputValue.value,
+            `<span style="color: red;">${descInputValue.value}</span>`
+          );
+        });
+      });
+    });
 };
 
 const handleInputConfirm = () => {
   inputValue.value = inputValue.value.replace("\n", "");
-  if(inputValue.value && isExist.value) {
+  if (inputValue.value && isExist.value) {
     dynamicTags.value[index.value] = inputValue.value;
+  } else if (inputValue.value) {
+    dynamicTags.value.push(inputValue.value);
   }
-  else if(inputValue.value) {
-    dynamicTags.value.push(inputValue.value)
-  };
-  
+
   inputVisible.value = false;
   inputValue.value = "";
-   axios.post(`${policyUpdate}`, {
-     id,
-     policyTags: dynamicTags.value.map(e => tagMap[e] ? tagMap[e] : e).join(),
-     isTag: 1
-   });
+  axios.post(`${policyUpdate}`, {
+    id,
+    policyTags: dynamicTags.value
+      .map((e) => (tagMap[e] ? tagMap[e] : e))
+      .join(),
+    isTag: 1,
+  });
 };
 </script>
 <style lang="scss" scoped>

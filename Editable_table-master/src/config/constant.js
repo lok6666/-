@@ -134,6 +134,28 @@ const relationOptions = [
     label: "关联",
   },
 ];
+const personOptions = [
+  {
+    value: '张全勇',
+    label: "张全勇"
+  },
+  {
+    value: '蔡凤',
+    label: "蔡凤"
+  },
+  {
+    value: '许宁',
+    label: "许宁"
+  },
+  {
+    value: '任翰墨',
+    label: "任翰墨"
+  },
+  {
+    value: '崔雨萱',
+    label: "崔雨萱"
+  }
+];
   module.exports = {
     levelMap,
     typeMap,
@@ -144,5 +166,6 @@ const relationOptions = [
     policyOptions,
     typeOptions,
     locationOptions,
-    relationOptions
+    relationOptions,
+    personOptions
   }

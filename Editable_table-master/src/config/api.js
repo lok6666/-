@@ -17,3 +17,7 @@ export  const policyTagInsert = `${host}/policyRelation/insert` //  政策解读
 export  const policyRelationList = `${host}/policyRelation/list` //  关联信息
 export  const policyFileInsert = `${host}/policyRelation/insertByPolicyIds` //  政策文件insert接口
 export  const policyFilelistByNoticeId = `${host}/policyRelation/listByNoticeId` //  详情页关联信息接口
+
+/*标签列表*/
+export  const industryCodeList = `${host}/industryCode/list` //  标签列表
+export  const personInsert = `${host}/policyPerson/insert` //  标签列表

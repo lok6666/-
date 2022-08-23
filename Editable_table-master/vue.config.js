@@ -1,6 +1,7 @@
 const path = require('path')
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 const CompressionWebpackPlugin = require('compression-webpack-plugin')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
 const productionGzipExtensions = ['js', 'css']
 function resolve(dir) {
   return path.join(__dirname, dir)
@@ -33,7 +34,12 @@ module.exports = {
         },
         sourceMap: false,
         parallel: true
-      })
+      }),
+      // new HtmlWebpackPlugin({
+      //   title: '政策标签工具',
+      //   template: './public/index.html',
+      //   filename: 'index.html'
+      // })
     ]
   },
   productionSourceMap: false,
