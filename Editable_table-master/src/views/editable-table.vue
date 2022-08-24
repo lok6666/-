@@ -92,22 +92,31 @@
         </el-select>
       </div>
       <div style="display: inline-flex">
-        <el-input v-model="formInline.username" style="width: 200px;" placeholder="请输入标题" />
-        <el-input v-model="formInline.tagKey" style="width: 200px;" placeholder="请输入标签关键字" />
+        <el-input
+          v-model="formInline.username"
+          style="width: 200px"
+          placeholder="请输入标题"
+        />
+        <el-input
+          v-model="formInline.tagKey"
+          style="width: 200px"
+          placeholder="请输入标签关键字"
+        />
         <div style="display: inline-block">
-         <el-date-picker
-          v-model="startTime"
-          type="datetime"
-          placeholder="开始时间"
-          format="YYYY/MM/DD HH:mm:ss"
-          value-format="YYYY-MM-DD HH:mm:ss"
-        /><el-date-picker
-          v-model="endTime"
-          type="datetime"
-          placeholder="结束时间"
-          format="YYYY/MM/DD HH:mm:ss"
-          value-format="YYYY-MM-DD hh:mm:ss"
-        /></div>
+          <el-date-picker
+            v-model="startTime"
+            type="datetime"
+            placeholder="开始时间"
+            format="YYYY/MM/DD HH:mm:ss"
+            value-format="YYYY-MM-DD HH:mm:ss"
+          /><el-date-picker
+            v-model="endTime"
+            type="datetime"
+            placeholder="结束时间"
+            format="YYYY/MM/DD HH:mm:ss"
+            value-format="YYYY-MM-DD hh:mm:ss"
+          />
+        </div>
         <el-button type="primary" @click="onSubmit">搜索</el-button>
         <el-button type="danger" class="button-new-tag ml-1" @click="reset"
           >重置
@@ -433,7 +442,13 @@
       <el-table-column label="发布时间" width="200">
         <template #default="scope">{{ scope.row.policyTime }}</template>
       </el-table-column>
-      <el-table-column prop="lastUpdateTime" label="删除时间" v-if="policyStatus" sortable width="200">   
+      <el-table-column
+        prop="lastUpdateTime"
+        label="删除时间"
+        v-if="policyStatus"
+        sortable
+        width="200"
+      >
         <template #default="scope">{{ scope.row.lastUpdateTime }}</template>
       </el-table-column>
       <el-table-column
@@ -517,7 +532,6 @@
         v-model:currentPage="currentPage4"
         v-model:page-size="pageSize4"
         :page-sizes="[10, 30, 70, 100]"
-        :background="background"
         layout="total, sizes, prev, pager, next, jumper"
         :total="total"
         @size-change="handleSizeChange"
@@ -533,8 +547,8 @@ export default {
 </script>
 <script setup>
 import { useRouter } from "vue-router";
-import { ref, reactive, shallowRef, onMounted, onBeforeUnmount } from "vue";
-import axios from "axios";
+import { ref, reactive, shallowRef, onMounted, onBeforeUnmount, inject } from "vue";
+
 import {
   policyUpdate,
   policyInsert,
@@ -555,13 +569,13 @@ import {
   typeOptions,
   locationOptions,
   relationOptions,
-  personOptions
+  personOptions,
 } from "../config/constant";
 import { Editor, Toolbar } from "@wangeditor/editor-for-vue";
 import { Boot } from "@wangeditor/editor";
 import formData from "form-data";
 import attachmentModule from "@wangeditor/plugin-upload-attachment";
-import dateFormat, { masks } from "dateformat";
+import axios from "axios";
 import "@wangeditor/editor/dist/css/style.css";
 // http request 拦截器
 axios.interceptors.request.use(function (config) {
@@ -571,6 +585,7 @@ axios.interceptors.request.use(function (config) {
   return config;
 });
 Boot.registerModule(attachmentModule);
+const renovate = inject("reload");
 const activeName = ref("exist");
 const currentPage4 = ref(1);
 const pageSize4 = ref(10);
@@ -614,7 +629,6 @@ const total = ref(0);
 const pageNum = ref(1);
 const pageSize = ref(10);
 const tableData = ref([]);
-const background = ref(false);
 const levelValue = ref("");
 const typeValue = ref("有效");
 const policyKind = ref("通知公告");
@@ -624,7 +638,7 @@ const detailRow = ref();
 const announcementVisible = ref(false);
 const locationValue = ref("shijingshan");
 const isRelationValue = ref(0);
-const personValue = ref('');
+const personValue = ref("");
 const inputName = ref("");
 const tagName = ref("");
 const formInline = reactive({
@@ -664,8 +678,7 @@ const editorConfig = {
     uploadAttachment: {
       customUpload(file, insertFn) {
         var axios = require("axios");
-        var FormData = require("form-data");
-        var data = new FormData();
+        var data = new formData();
         data.append("file", file); // file 即选中的文件
         data.append("userId", 1);
         data.append("type", "file");
@@ -697,8 +710,7 @@ const editorConfig = {
     uploadImage: {
       customUpload(file, insertFn) {
         var axios = require("axios");
-        var FormData = require("form-data");
-        var data = new FormData();
+        var data = new formData();
         data.append("file", file); // file 即选中的文件
         data.append("userId", 1);
         data.append("type", "image");
@@ -731,8 +743,7 @@ const editorConfig = {
     uploadVideo: {
       customUpload(file, insertFn) {
         var axios = require("axios");
-        var FormData = require("form-data");
-        var data = new FormData();
+        var data = new formData();
         data.append("file", file); // file 即选中的文件
         data.append("userId", 1);
         data.append("type", "video");
@@ -794,7 +805,7 @@ const query = (e, policyKind, options) => {
   axios
     .post(`${policyTagList}`, {
       policyKind: policyKind,
-      policyTitle: e
+      policyTitle: e,
     })
     .then(({ data }) => {
       policyRuleForm.value[options] = data.data;
@@ -810,7 +821,7 @@ const relatePolicy = (row) => {
     time: row.policyTime,
     policyId: row.id,
     explain: [],
-    selectOptions: []
+    selectOptions: [],
   };
   // 政策文件或政策解读 政策关联弹窗展示 政策解读 和 通知公告
   policyKind.value !== "通知公告" &&
@@ -880,7 +891,6 @@ const relationShap = async () => {
     });
     announcementVisible.value = false;
   } else {
-    debugger;
     await axios.post(`${policyTagInsert}`, {
       policyId: policyRuleForm.value.policyId,
       noticeIds: policyRuleForm.value.explain,
@@ -934,6 +944,7 @@ const closeDialog = () => {
 const routerCloseDialog = () => {
   iframeSrc.value = "";
   routeDialogVisible.value = false;
+  getData();
 };
 // 添加
 const add = () => {
@@ -988,6 +999,7 @@ const reset = () => {
   isTag.value = 0;
   startTime.value = "";
   endTime.value = "";
+  activeName.value = 'exist';
   getData(policyStatus.value);
 };
 
@@ -1053,7 +1065,6 @@ const getData = (status) => {
       endTime: endTime.value,
     })
     .then(function ({ data: list }) {
-      debugger;
       tableData.value = list.data.list;
       total.value = list.data.total;
     })
@@ -1083,6 +1094,41 @@ const routerTo = (index, id, row) => {
   //   name: "EditableV2",
   //   params: { id, policyKind: row.policyKind }
   // });
+ /*  axios
+    .post(
+      `http://gateway.serviceshare.com/zhenghe-api-webapp/api/enterprise/getLoginSignKey`,
+        {
+          "username": "13835872907@qq.com"
+        }
+    ).then(e => {
+        axios
+    .post(
+      `http://gateway.serviceshare.com/zhenghe-api-webapp/api/enterprise/login`,
+      {
+        username: "13835872907@qq.com",
+        password:
+          "rtmsL8/jSoBr1KgHAmlkWWdO2Lu/HSHnF57ISLc73FB6EksqBpF1jwHv5mW2iG3J0v07RUqoP/oKJ5wSTdvH0QCCbdyW238FdE8ByzqQTgtnT1Yp8NJ2U2c6aTi50qMEWUm3gqqgGz3BDXc0Vig8mahqZ6J9z41Wx+faVMjdUTc=",
+        domain: "merchant.serviceshare.com",
+        invite: null,
+      }
+    ).then(
+      ({
+        data: {
+          result: { token },
+        },
+      }) => {
+        window.localStorage.token = token;
+        axios.get(
+          `http://gateway.serviceshare.com/design-api-webapp/api/enterprise/validateLogin?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2NjEzMTc2NDEsInVzZXJuYW1lIjoiMTAyMTcifQ.MykwgiB_NYcmfZSbs_L1N5EzBVnyE6VWuVEyX1GSzoU`
+        )
+          .then(() => {
+            debugger;
+            document.getElementsByTagName('iframe');
+            window.open("http://merchant.serviceshare.com/home");
+          });
+      }
+    );
+    }); */
 };
 // 删除
 const deleteTable = (id) => {

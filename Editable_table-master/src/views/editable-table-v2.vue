@@ -1,7 +1,8 @@
 <template>
   <!-- 可编辑表格V2 -->
   <div id="detail">
-    <div class="Md-zcxx" style="width: 78%">
+    <!-- <iframe src="http://merchant.serviceshare.com/home"></iframe> -->
+    <div class="Md-zcxx" style="width: 72%">
       <div class="MD-fcje1">
         <div v-html="data.policyContent" style="font-size: 18px"></div>
         <div style="height: 300px">
@@ -26,12 +27,12 @@
     </div>
     <div style="height: 100%; margin-left: 10px; padding-right: 10px">
       <div style="height: 300px; position: fixed; top: 0px">
-        <el-tag
+      <el-tag
           v-for="tag in dynamicTags"
           :key="tag"
           class="mx-1"
           style="margin-right: 10px"
-          closable
+          :closable="isClosable(tag)"
           :disable-transitions="false"
           @close="handleClose(tag)"
           @click="handleClick(tag)"
@@ -72,7 +73,8 @@
           >
             <el-table-column prop="indType" label="类别" width="80" />
             <el-table-column prop="indName" label="名称" width="150" />
-            <el-table-column prop="indFile" label="文件" width="150" />
+            <el-table-column prop="indOne" label="大类" width="150" />
+            <el-table-column prop="indFile" label="行业" width="150" />
           </el-table>
         </div>
       </div>
@@ -95,7 +97,8 @@ import { tagMap } from "../config/constant";
 const inputValue = ref("");
 const descList = ref([]);
 const descInputValue = ref("");
-const dynamicTags = ref(Object.keys(tagMap));
+const dynamicTags = ref([]);
+const editDynamicTags = ref(Object.keys(tagMap));
 const inputVisible = ref(false);
 const isExist = ref(false);
 const index = ref(0);
@@ -147,13 +150,18 @@ const routeTo = (id) => {
   //   params: { id },
   // });
 };
+const isClosable = (tag) => {
+    // 默认列表不增加删除按钮
+    console.log('tag', tag);
+    return tag.match(/\S*[\:|\：]/gi) && editDynamicTags.value.indexOf(tag.match(/\S*[\:|\：]/gi)[0]) !== -1? false: true
+};
 axios
   .get(`${policyDetail}/${id}`, {})
   .then(function (res) {
     data.value = res.data.data;
     dynamicTags.value = data.value.policyTags
       ? data.value.policyTags.split(",")
-      : dynamicTags.value;
+      : Object.keys(tagMap);
   })
   .catch(function (error) {
     console.log(error);
@@ -180,7 +188,7 @@ const handleClick = (tag) => {
 
 const showInput = () => {
   inputVisible.value = true;
-  isExist.value = "";
+  isExist.value = false;
 };
 const handleDesc = () => {
   console.log("handleDesc");
@@ -192,10 +200,8 @@ const handleDesc = () => {
     })
     .then(async function ({ data }) {
       descList.value = data.data.list;
-      // debugger;
       nextTick(() => {
         //代码
-        // debugger;
         const cell = document.querySelectorAll(
           ".el-table__body tbody tr td:nth-child(2)"
         );
