@@ -3,31 +3,36 @@
   <div id="detail">
     <!-- <iframe src="http://merchant.serviceshare.com/home"></iframe> -->
     <div class="Md-zcxx" style="width: 72%">
-      <div class="MD-fcje1">
-        <div v-html="data.policyContent" style="font-size: 18px"></div>
-        <div style="height: 300px">
-          <span>政策关联信息</span>
-          <ul
-            class="polic-relation"
-            style="overflow: auto; overflow-x: scroll; width: fit-content"
+      <!-- <iframe :src="data.policyUrl" frameborder="0" style="min-width: 860px; height: 1000px;"></iframe> -->
+      <div
+        v-html="data.policyContent"
+        class="detail-policyContent"
+        style="font-size: 18px"
+      ></div>
+      <div style="height: 300px">
+        <span>政策关联信息</span>
+        <ul
+          class="polic-relation"
+          style="overflow: auto; overflow-x: scroll; width: fit-content"
+        >
+          <li
+            v-for="i in count"
+            :key="i"
+            class="polic-relation-item"
+            @click="
+              routeTo(policyKind === '通知公告' ? i.policyId : i.noticeId)
+            "
           >
-            <li
-              v-for="i in count"
-              :key="i"
-              class="polic-relation-item"
-              @click="
-                routeTo(policyKind === '通知公告' ? i.policyId : i.noticeId)
-              "
-            >
-              {{ i.noticeTitle }}
-            </li>
-          </ul>
-        </div>
+            {{ i.noticeTitle }}
+          </li>
+        </ul>
       </div>
     </div>
     <div style="height: 100%; margin-left: 10px; padding-right: 10px">
       <div style="height: 300px; position: fixed; top: 0px">
-      <el-tag
+        <!-- <div style="height: 100%;">
+      <div> -->
+        <el-tag
           v-for="tag in dynamicTags"
           :key="tag"
           class="mx-1"
@@ -85,6 +90,7 @@
 <script setup>
 import { useRouter } from "vue-router";
 import axios from "axios";
+import urltest from "url";
 import { ref, onMounted, nextTick } from "vue";
 import {
   policyUpdate,
@@ -96,6 +102,7 @@ import {
 import { tagMap } from "../config/constant";
 const inputValue = ref("");
 const descList = ref([]);
+const url = urltest;
 const descInputValue = ref("");
 const dynamicTags = ref([]);
 const editDynamicTags = ref(Object.keys(tagMap));
@@ -151,14 +158,34 @@ const routeTo = (id) => {
   // });
 };
 const isClosable = (tag) => {
-    // 默认列表不增加删除按钮
-    console.log('tag', tag);
-    return tag.match(/\S*[\:|\：]/gi) && editDynamicTags.value.indexOf(tag.match(/\S*[\:|\：]/gi)[0]) !== -1? false: true
+  // 默认列表不增加删除按钮
+  return tag.match(/\S*[\:|\：]/gi) &&
+    editDynamicTags.value.indexOf(tag.match(/\S*[\:|\：]/gi)[0]) !== -1
+    ? false
+    : true;
 };
 axios
   .get(`${policyDetail}/${id}`, {})
   .then(function (res) {
     data.value = res.data.data;
+    nextTick(() => {
+      let {href} = url.parse(data.value.policyUrl);
+      // // 附件链接替换
+      // document.querySelectorAll(".detail-policyContent .fujian a").forEach((e) => {
+      //   if (e.href && e.href.includes(location.origin)) {
+      //     console.log('detail-policyContent', e.href, location.origin);
+      //     e.href = e.href.replace(location.origin, href.substring(href.lastIndexOf('/'), -1));
+      //   }
+      // });
+      // // 附件链接替换
+      // document.querySelectorAll(".rightbox a").forEach((e) => {
+      //   console.log('detail-policyContent', e, url.parse(data.value.policyUrl));
+      //   // if (e.href && e.href.includes(location.origin)) {
+      //   //   console.log('detail-policyContent', e.href, location.origin, );
+      //   //   e.href = e.href.replace(location.origin, href.substring(href.lastIndexOf('/'), -1));
+      //   // }
+      // });
+    });
     dynamicTags.value = data.value.policyTags
       ? data.value.policyTags.split(",")
       : Object.keys(tagMap);
@@ -335,4 +362,12 @@ const handleInputConfirm = () => {
 .polic-relation .polic-relation-item + .list-item {
   margin-top: 10px;
 }
+// @media screen and (min-width: 1681px) {
+//         .Md-zcxx {
+//           iframe {
+//               width: 1300px;
+//           }
+
+//       }
+// }
 </style>

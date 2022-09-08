@@ -1,7 +1,7 @@
 // export const host = 'http://172.16.12.8:28182';
 // export const host = 'http://172.16.110.101:28191';
 console.log('process', process.env.NODE_ENV);
-export const host =  process.env.NODE_ENV === 'development'? "http://172.16.12.8:28182": "http://172.16.130.92:28191";
+export const host =  process.env.NODE_ENV === 'development'? "http://172.16.4.62:28182": "http://172.16.130.92:28191";
 
 
 /*政策发布*/

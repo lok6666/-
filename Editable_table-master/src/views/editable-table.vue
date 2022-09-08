@@ -499,7 +499,7 @@
             size="small"
             type="warning"
             style="margin-top: 10px"
-            @click="edit(scope.$index, scope.row)"
+            @click="edit(scope.row)"
             >编辑</el-button
           >
           <el-button
@@ -1010,8 +1010,7 @@ const handleClose = async (ruleFormRef) => {
       let obj = {
         ...ruleForm,
         policyLevel: levelMap[ruleForm.policyLevel],
-        policyType: typeMap[ruleForm.policyType],
-        policyKind: policyKind.value,
+        policyType: typeMap[ruleForm.policyType]
       };
       axios
         .post(title.value === "新增" ? `${policyInsert}` : `${policyUpdate}`, {
@@ -1019,6 +1018,10 @@ const handleClose = async (ruleFormRef) => {
         })
         .then(function (data) {
           getData();
+          // 当详情表单数据存在,修改详情数据表单
+          if(detailRow.value) {
+            detailRow.value = obj;
+          };
           dialogVisible.value = false;
           for (const i in ruleForm) {
             ruleForm[i] = "";

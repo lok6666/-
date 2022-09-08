@@ -66,6 +66,14 @@ const typeOptions = [
 ];
 const locationOptions = [
   {
+    value: "china",
+    label: "中国",
+  },
+  {
+    value: "beijing",
+    label: "北京",
+  },
+  {
     value: "dongcheng",
     label: "东城区",
   },
@@ -90,10 +98,6 @@ const locationOptions = [
     label: "石景山区",
   },
   {
-    value: "beijing",
-    label: "北京",
-  },
-  {
     value: "tongzhou",
     label: "通州区",
   },
@@ -112,7 +116,7 @@ const locationOptions = [
   {
     value: "mentougou",
     label: "门头沟区",
-  },
+  }
 ];
 const tagMap = {
   "惠企方式:": `惠企方式: 全惠企方式`,
